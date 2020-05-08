@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flash_chat/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'welcome_screen.dart';
 
 final _fireStore = Firestore.instance;
+FirebaseUser loggedInUser;
+final _auth = FirebaseAuth.instance;
 
 class ChatScreen extends StatefulWidget {
   static const String id = 'chat_screen';
@@ -17,8 +18,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   String messageText;
   final messageTextController = TextEditingController();
-  final _auth = FirebaseAuth.instance;
-  FirebaseUser loggedInUser;
+
   @override
   void initState() {
     getCurrentUser();
@@ -113,17 +113,23 @@ class MessageStream extends StatelessWidget {
             ),
           );
         }
-        final messages = snapshot.data.documents;
+        final messages = snapshot.data.documents.reversed;
         List<MessageBubble> messageBubbles = [];
         for (var message in messages) {
           final messageText = message.data['text'];
           final messageSender = message.data['sender'];
-          final messageBubble =
-              MessageBubble(text: messageText, sender: messageSender);
+          final currentUser = loggedInUser.email;
+
+          final messageBubble = MessageBubble(
+            text: messageText,
+            sender: messageSender,
+            isMe: messageSender == currentUser,
+          );
           messageBubbles.add(messageBubble);
         }
         return Expanded(
           child: ListView(
+            reverse: true,
             padding: EdgeInsets.symmetric(
               vertical: 20,
               horizontal: 10,
