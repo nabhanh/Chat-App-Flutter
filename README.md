@@ -1,0 +1,1 @@
+Simple Chat App to integrate Firebase and Firestore into Flutter!
